@@ -31,7 +31,9 @@ Shake() {
 
 ;Loop label to change transparency and shake window when HP is low enough
 CheckNotepadHP:
+	clipboard = ; Clears the clipboard to prevent paste https://autohotkey.com/docs/misc/Clipboard.htm
 	WinSet, Transparent, %numpadHP%, ahk_exe notepad.exe
+
 	if (numpadHP < 200) {
 		Shake()
 	}
