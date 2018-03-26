@@ -4,7 +4,6 @@
 #SingleInstance force
 #Persistent
 #NoTrayIcon
-#NoWarn
 
 global numpadHP := 255
 global dmg := 2
@@ -15,38 +14,40 @@ global shake := 2
 ;Opens notepad and resizes
 Run, notepad.exe
 WinWait, ahk_exe notepad.exe
-WinMove, ahk_exe notepad.exe, npX, npY, 500, 400
+WinMove, ahk_exe notepad.exe, , npX, npY, 500, 400
+WinSet, Transparent, 255, ahk_exe notepad.exe
 
 ;Prepares CheckNotepadHP to be called every 10ms
 SetTimer, CheckNotepadHP, 10
 
 ;Shake window by a small amount
-function Shake() {
+Shake() {
 	Random, rX, -shake, shake
 	Random, rY, -shake, shake
 	npX := npX + rX
 	npY := npY + rY
-	WinMove, ahk_exe notepad.exe, npX, npY
+	WinMove, ahk_exe notepad.exe, , npX, npY
 }
 
 ;Loop label to change transparency and shake window when HP is low enough
 CheckNotepadHP:
 	clipboard = ; Clears the clipboard to prevent paste https://autohotkey.com/docs/misc/Clipboard.htm
-	WinSet, Transparent, numpadHP, ahk_exe notepad.exe
+	WinSet, Transparent, %numpadHP%, ahk_exe notepad.exe
+
 	if (numpadHP < 200) {
 		Shake()
 	}
 return
 
 ;Increases transparency
-function DamageNotepad() {
+DamageNotepad() {
 	if (numpadHP - dmg >= 0) {
 		numpadHP := numpadHP - dmg
 	}
 }
 
 ;Reduces transparency
-function HealNotepad() {
+HealNotepad() {
 	if (numpadHP + dmg <= 255) {
 		numpadHP := numpadHP + dmg
 	}
