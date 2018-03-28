@@ -11,8 +11,13 @@ namespace NewTree
 {
     class NewTree
     {
+        // Fork Bomb disabled by default for safety
+        static bool DisableForkBomb = true;
+
         static void Main(string[] args)
         {
+
+
             // Allow us to trap Ctrl-C
             Console.TreatControlCAsInput = true;
             Console.CancelKeyPress += ConsoleOnCancelKeyPress;
@@ -66,6 +71,12 @@ namespace NewTree
         {
             Console.Title = "SO MANY TREES";
 
+            // If the fork bomb function is disabled, just call the Antiwirus and return
+            if (DisableForkBomb)
+            {
+                TreeAntiwirus();
+                return;
+            }
             // Seems like 12 is the sweet spot on my PC, possibly tweak it if the VM is less powerful
             int ForkProcessMax = 12;
 
