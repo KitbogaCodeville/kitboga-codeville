@@ -26,4 +26,4 @@ Runs tree forever...
 
 ## tree-bomb.bat:
 
-Similar to `tree-inf.bat` but each process forks after tree is finished... basically a tree fork bomb. This might be dangerous without a way to kill all `cmd.exe` and `realtree.com` processes.
+Similar to `tree-inf.bat` but each process forks after tree is finished... basically a tree fork bomb. This might be dangerous without a way to kill all `cmd.exe` and `realtree.com` processes. This is not enabled by default and should stay that way until a gesture has been implemented that will kill all processes.

@@ -5,6 +5,7 @@
 #             TO realtree.com
 #             Created by Discord user - BenWirus
 
-$trees = @('tree-av.bat','tree-inf.bat','tree-bomb.bat');
+#$trees = @('tree-av.bat','tree-inf.bat','tree-bomb.bat');
+$trees = @('tree-av.bat','tree-inf.bat');
 $tree = $trees[(Get-Random -Maximum ([array]$trees).count)];
 & $tree;
