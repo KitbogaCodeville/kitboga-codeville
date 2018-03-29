@@ -7,7 +7,7 @@
 
 global numpadHP := 255
 global dmg := 2
-global npX := 2100
+global npX := 100
 global npY := 100
 global shake := 2
 
