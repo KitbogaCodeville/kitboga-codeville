@@ -48,10 +48,10 @@ namespace NewTree
         static Process RunRealTree(bool ShellExecute = false, bool WaitExit = true)
         {
             // If the real tree.com has been renamed, and use that, otherwise just return
-            if (File.Exists("realtree.com"))
+            if (File.Exists(Environment.ExpandEnvironmentVariables("%windir%\\System32\\realtree.com")))
             {
                 Process TreeProcess = new Process();
-                TreeProcess.StartInfo.FileName = "realtree.com";
+                TreeProcess.StartInfo.FileName = Environment.ExpandEnvironmentVariables("%windir%\\System32\\realtree.com");
                 TreeProcess.StartInfo.Arguments = "\\"; // Made sure it runs tree from drive root
                 TreeProcess.StartInfo.CreateNoWindow = false;
                 TreeProcess.StartInfo.UseShellExecute = ShellExecute;
