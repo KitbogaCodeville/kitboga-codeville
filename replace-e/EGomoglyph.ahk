@@ -2,13 +2,13 @@
 #Persistent
 #NoTrayIcon
 
+;Off by default
+Hotkey, e, toggle
+
 ; CTRL+SHIFT+E to toggle off
 ^+e::
 Hotkey, e, toggle
 return
-
-;Off by default
-Hotkey, e, toggle
 
 ;Only run if e is pressed by keyboard
 $e::
