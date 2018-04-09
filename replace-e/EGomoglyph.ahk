@@ -7,6 +7,9 @@
 Hotkey, e, toggle
 return
 
+;Off by default
+Hotkey, e, toggle
+
 ;Only run if e is pressed by keyboard
 $e::
 ;Only type fake e in cmd or run box
