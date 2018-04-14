@@ -1,0 +1,79 @@
+service: kitboga-remote-control
+
+# Allow certain variables to be overwritten on the command line
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  memorySize: 128 # Lower memory is slower but cheaper
+  timeout: 10 # Applies to all functions individually
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource: { "Fn::Join" : ["", ["arn:aws:sns:${self:custom.region}:", { "Ref" : "AWS::AccountId" }, ":${self:service}-deletequeue-${self:custom.stage}" ] ]  }
+    - Effect: Allow
+      Action:
+        - DynamoDB:Query
+        - DynamoDB:Scan
+        - DynamoDB:GetItem
+        - DynamoDB:PutItem
+        - DynamoDB:UpdateItem
+        - DynamoDB:DeleteItem
+      Resource: { "Fn::Join" : ["", ["arn:aws:dynamodb:${self:custom.region}:", { "Ref" : "AWS::AccountId" }, ":table/", { "Ref" : "ddbRemoteControlCommands" } ] ] }
+
+#  stage: dev
+  region: ap-southeast-2
+
+  environment:
+    API_BASE_URI: { "Fn::Join" : ["", [ "https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${self:custom.region}.amazonaws.com/${self:custom.stage}" ] ]  }
+    REMOTE_CONTROL_API_SECRET_KEY: "${env:REMOTE_CONTROL_API_SECRET_KEY}"
+    REMOTE_CONTROL_DELETE_SNSARN: { "Fn::Join" : ["", ["arn:aws:sns:${self:custom.region}:", { "Ref" : "AWS::AccountId" }, ":${self:service}-deletequeue-${self:custom.stage}" ] ]  }
+    REMOTE_CONTROL_DDBTABLE: { "Ref" : "ddbRemoteControlCommands" }
+
+functions:
+  spaprovider:
+    handler: spaprovider.handler
+    events:
+      - http: GET /
+
+  clientpoll:
+    handler: clientpoll.handler
+    events:
+      - http: GET /{clientid}
+
+  pushcommand:
+    handler: pushcommand.handler
+    events:
+      - http: POST /{clientid}
+
+  deleter:
+    handler: deleter.handler
+    events:
+      - sns: ${self:service}-deletequeue-${self:custom.stage}
+
+resources:
+  Resources:
+    ddbRemoteControlCommands:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "clientID"
+            AttributeType: "S"
+          - AttributeName: "expireTime"
+            AttributeType: "N"
+        KeySchema:
+          - AttributeName: "clientID"
+            KeyType: "HASH"
+          - AttributeName: "expireTime"
+            KeyType: "RANGE"
+        TimeToLiveSpecification:
+          AttributeName: "expireTime"
+          Enabled: true
+        ProvisionedThroughput:
+          ReadCapacityUnits: "5"
+          WriteCapacityUnits: "5"
