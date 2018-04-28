@@ -1,13 +1,16 @@
-// This program changes the status of items in the System Configuration dialog (msconfig.exe) from "Stopped" to "Running"
+// This program changes the text of listview items in the System Configuration dialog (msconfig.exe) based on entries in replace.txt
 // 
 // Code based on https://stackoverflow.com/a/12683120
 //
 // Note: If msconfig is a 64 bit process, this program also needs to be compiled as x64
 
 #include "stdafx.h"
-#include <iostream>
+#include "filereader.h"
+
 #include <windows.h>
 #include <CommCtrl.h>
+#include <iostream>
+
 
 using namespace std;
 
@@ -35,33 +38,44 @@ BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam)
 			LVITEM* pLvItem = (LVITEM*)VirtualAllocEx(hProcess, NULL, sizeof(LVITEM), MEM_COMMIT, PAGE_READWRITE);
 			LPTSTR pText = (LPTSTR)VirtualAllocEx(hProcess, NULL, sizeof(TCHAR) * LSTR, MEM_COMMIT, PAGE_READWRITE);
 
+			// How many columns are there?
+			HWND hwndHeader = ListView_GetHeader(hwnd);
+			int iColumnCount = Header_GetItemCount(hwndHeader);
+
 			// Iterate over all of the listview items
 			int iCount = ListView_GetItemCount(hwnd);
-			for (int i = 0; i < iCount; i++) {
+			for (int iCurItem = 0; iCurItem < iCount; iCurItem++) {
 
-				LVITEM lvItem = { 0 };
-				lvItem.mask = LVIF_TEXT;
-				lvItem.iItem = i;
-				lvItem.iSubItem = 2;	// Status column
-				lvItem.pszText = pText; // Pointer to the buffer that receives the item text
-				lvItem.cchTextMax = LSTR;
+				for (int iCurColumn = 0; iCurColumn < iColumnCount; iCurColumn++) {
 
-				// Write our local lvItem to the memory we allocated in msconfig
-				WriteProcessMemory(hProcess, pLvItem, &lvItem, sizeof(LVITEM), NULL);
+					LVITEM lvItem = { 0 };
+					lvItem.mask = LVIF_TEXT;
+					lvItem.iItem = iCurItem;
+					lvItem.iSubItem = iCurColumn;
+					lvItem.pszText = pText; // Pointer to the buffer that receives the item text
+					lvItem.cchTextMax = LSTR;
 
-				// Check the text of the current item
-				int iCharsRead = int(SendMessage(hwnd, LVM_GETITEMTEXT, i, LPARAM(pLvItem)));
-				if (iCharsRead > 0) {
+					// Write our local lvItem to the memory we allocated in msconfig
+					WriteProcessMemory(hProcess, pLvItem, &lvItem, sizeof(LVITEM), NULL);
 
-					// Copy the remote buffer containing the result into szText
-					TCHAR szText[LSTR] = { 0 };
-					ReadProcessMemory(hProcess, pText, &szText[0], sizeof(TCHAR) * iCharsRead, NULL);
+					// Check the text of the current item
+					int iCharsRead = int(SendMessage(hwnd, LVM_GETITEMTEXT, iCurItem, LPARAM(pLvItem)));
+					if (iCharsRead > 0) {
 
-					// If the item text is "Stopped" change it to something else
-					if (_tcscmp(szText, TEXT("Stopped")) == 0) {
-						// We can reuse the lvItem struct for LVM_SETITEMTEXT, just change its text first
-						WriteProcessMemory(hProcess, pText, TEXT("Running"), LSTR, NULL);
-						SendMessage(hwnd, LVM_SETITEMTEXT, i, LPARAM(pLvItem));
+						// Copy the remote buffer containing the result into szText
+						TCHAR szText[LSTR] = { 0 };
+						ReadProcessMemory(hProcess, pText, &szText[0], sizeof(TCHAR) * iCharsRead, NULL);
+
+						// Does the Find/Replace map contain the string found in the listview item?
+						map<wstring, wstring>* pFindReplaceData = (map<wstring, wstring>*)(lParam);
+						if (pFindReplaceData == nullptr) break;
+
+						map<wstring, wstring>::iterator itMap = pFindReplaceData->find(szText);
+						if (itMap != pFindReplaceData->end()) {
+							// We can reuse the lvItem struct for LVM_SETITEMTEXT, just change its text first
+							WriteProcessMemory(hProcess, pText, itMap->second.c_str(), LSTR, NULL);
+							SendMessage(hwnd, LVM_SETITEMTEXT, iCurItem, LPARAM(pLvItem));
+						}
 					}
 
 				}
@@ -85,7 +99,7 @@ BOOL IsAppRunningAsAdmin()
 	BOOL bIsRunAsAdmin = FALSE;
 	PSID pAdminGroup = NULL; // SID of the admin group
 
-							 // Allocate and initialize pAdministratorsGroup
+	// Allocate and initialize pAdministratorsGroup
 	SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
 	BOOL bInitSuccess = AllocateAndInitializeSid(
 		&NtAuthority,
@@ -124,18 +138,29 @@ void RunAsAdmin()
 
 int main()
 {
+
 	// Make sure we're running as admin...(otherwise we can't mess with the system config window)
 	if (!IsAppRunningAsAdmin()) {
 		RunAsAdmin();
 		return 0; // Close this instance and let the admin instance execute
 	}
 
+	FileReader fileReader("replace.txt");
+	map<wstring, wstring> vFindReplaceData; // Key is the string to find, Value is the string to replace it with
+
 	// Continue to check if a "System Configuration" window is open
 	while (true) {
 		HWND hwndSC = FindWindow(0, TEXT("System Configuration"));
 		if (hwndSC != NULL) {
+
+			// Update our find & replace data
+			if (fileReader.HasFileChanged()) {
+				vFindReplaceData.clear();
+				fileReader.ReadFile(vFindReplaceData);
+			}
+
 			// Iterate through each child window in the system config window
-			EnumChildWindows(hwndSC, EnumChildProc, 0);
+			EnumChildWindows(hwndSC, EnumChildProc, LPARAM(&vFindReplaceData));
 		}
 	}
 
