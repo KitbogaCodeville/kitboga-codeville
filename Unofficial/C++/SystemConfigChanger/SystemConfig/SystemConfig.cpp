@@ -2,8 +2,7 @@
 // 
 // Code based on https://stackoverflow.com/a/12683120
 //
-// Note: This needs to be run as admin.
-// Also, if msconfig is a 64 bit process, this program also needs to be compiled as x64
+// Note: If msconfig is a 64 bit process, this program also needs to be compiled as x64
 
 #include "stdafx.h"
 #include <iostream>
@@ -14,7 +13,7 @@ using namespace std;
 
 #define LSTR	260
 
-// This function is called for each child hwnd of the System Configuration dialog
+// ** EnumChildProc - This function is called for each child hwnd of the System Configuration dialog
 BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam)
 {
 	// Ignore hidden controls
@@ -33,8 +32,8 @@ BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam)
 			GetWindowThreadProcessId(hwnd, &dwProcessId);
 			HANDLE hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, FALSE, dwProcessId);
 
-			LVITEM* pLvItem = (LVITEM*) VirtualAllocEx(hProcess, NULL, sizeof(LVITEM), MEM_COMMIT, PAGE_READWRITE);
-			LPTSTR pText = (LPTSTR) VirtualAllocEx(hProcess, NULL, sizeof(TCHAR) * LSTR, MEM_COMMIT, PAGE_READWRITE);
+			LVITEM* pLvItem = (LVITEM*)VirtualAllocEx(hProcess, NULL, sizeof(LVITEM), MEM_COMMIT, PAGE_READWRITE);
+			LPTSTR pText = (LPTSTR)VirtualAllocEx(hProcess, NULL, sizeof(TCHAR) * LSTR, MEM_COMMIT, PAGE_READWRITE);
 
 			// Iterate over all of the listview items
 			int iCount = ListView_GetItemCount(hwnd);
@@ -51,7 +50,7 @@ BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam)
 				WriteProcessMemory(hProcess, pLvItem, &lvItem, sizeof(LVITEM), NULL);
 
 				// Check the text of the current item
-				int iCharsRead = int(SendMessage(hwnd, LVM_GETITEMTEXT, i , LPARAM(pLvItem)));
+				int iCharsRead = int(SendMessage(hwnd, LVM_GETITEMTEXT, i, LPARAM(pLvItem)));
 				if (iCharsRead > 0) {
 
 					// Copy the remote buffer containing the result into szText
@@ -79,14 +78,66 @@ BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam)
 	return TRUE;
 }
 
+// ** IsAppRunningAsAdmin - returns true if this instance of the app has admin privileges
+BOOL IsAppRunningAsAdmin()
+{
+	// https://www.codeproject.com/Articles/320748/Haephrati-Elevating-during-runtime
+	BOOL bIsRunAsAdmin = FALSE;
+	PSID pAdminGroup = NULL; // SID of the admin group
+
+							 // Allocate and initialize pAdministratorsGroup
+	SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+	BOOL bInitSuccess = AllocateAndInitializeSid(
+		&NtAuthority,
+		2,
+		SECURITY_BUILTIN_DOMAIN_RID,
+		DOMAIN_ALIAS_RID_ADMINS,
+		0, 0, 0, 0, 0, 0,
+		&pAdminGroup
+	);
+
+	// Determine if the SID of the admin group is enabled in the primary access token of the process
+	if (bInitSuccess) CheckTokenMembership(NULL, pAdminGroup, &bIsRunAsAdmin);
+
+	// Cleanup
+	if (pAdminGroup != NULL) FreeSid(pAdminGroup);
+
+	return bIsRunAsAdmin;
+}
+
+// ** RunAsAdmin - Launches this app with admin privileges
+void RunAsAdmin()
+{
+	// https://www.codeproject.com/Articles/320748/Haephrati-Elevating-during-runtime
+	wchar_t szAppName[LSTR];
+	if (GetModuleFileName(NULL, szAppName, LSTR) != 0) {
+		// Launch self as admin
+		SHELLEXECUTEINFO shellExeInfo = { sizeof(shellExeInfo) };
+		shellExeInfo.lpVerb = L"runas";
+		shellExeInfo.lpFile = szAppName;
+		shellExeInfo.hwnd = NULL;
+		shellExeInfo.nShow = SW_NORMAL;
+
+		ShellExecuteEx(&shellExeInfo);
+	}
+}
+
 int main()
 {
-
-	// Iterate through each child window in the system config window
-	HWND hwndSC = FindWindow(0, TEXT("System Configuration"));
-	if (hwndSC != NULL) {
-		EnumChildWindows(hwndSC, EnumChildProc, 0);
+	// Make sure we're running as admin...(otherwise we can't mess with the system config window)
+	if (!IsAppRunningAsAdmin()) {
+		RunAsAdmin();
+		return 0; // Close this instance and let the admin instance execute
 	}
 
-    return 0;
+	// Continue to check if a "System Configuration" window is open
+	while (true) {
+		HWND hwndSC = FindWindow(0, TEXT("System Configuration"));
+		if (hwndSC != NULL) {
+			// Iterate through each child window in the system config window
+			EnumChildWindows(hwndSC, EnumChildProc, 0);
+		}
+	}
+
+	return 0;
 }
