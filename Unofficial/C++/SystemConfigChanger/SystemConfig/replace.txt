@@ -1,0 +1,2 @@
+// "A" "B" will replace all instances of "A" with "B" in the Services tab of the System Configuration window
+"Stopped" "Totally not stopped"
