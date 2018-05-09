@@ -2,10 +2,23 @@
     CONSOLE APPLICATION : SystemConfig Project Overview
 ========================================================================
 
-This program changes the status of items in the System Configuration dialog (msconfig.exe) from "Stopped" to "Running"
+This program changes the text of listview items in the System Configuration dialog (msconfig.exe) based on entries in a text file.
+See https://i.imgur.com/uxoduGg.gifv for an example of it in action.
+The text file should be in the following format, quotation marks included:
 
-Note: This needs to be run as an administrator to work. 
-Also, if msconfig.exe is a 64 bit process, this program needs to be compiled as x64
+"Stopped" "Bogus Status"
+"Microsoft Corporation" "Bogus Company"
+
+The text will update as soon as the find & replace text file is saved.
+
+*** Currently only finds & replaces full strings, no substrings
+
+*** Note: If msconfig is a 64 bit process, this program also needs to be compiled as x64.
+
+
+
+
+
 
 AppWizard has created this SystemConfig application for you.
 
