@@ -9,7 +9,7 @@ class FileReader {
 public:
 	explicit FileReader(string sFilePath);
 
-	void ReadFile(map<wstring, wstring>& vFindReplaceData); // Populates vFindReplaceData with strings from the file
+	void ReadFile(map<string, string>& vFindReplaceData); // Populates vFindReplaceData with strings from the file
 	bool HasFileChanged() const; // Has the file been saved since the last ReadFile call?
 	
 private:

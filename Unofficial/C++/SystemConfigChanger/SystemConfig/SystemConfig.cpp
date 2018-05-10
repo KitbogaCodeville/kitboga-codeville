@@ -1,8 +1,12 @@
-// This program changes the text of listview items in the System Configuration dialog (msconfig.exe) based on entries in replace.txt
-// 
-// Code based on https://stackoverflow.com/a/12683120
-//
+// This program changes the text of listview items in the System Configuration dialog (msconfig.exe) based on entries in a text file.
+/* The text file should be in the following format, quotation marks included:
+"Stopped" "Bogus Status"
+"Microsoft Corporation" "Bogus Company"
+*/
+// Currently only finds & replaces full strings, no substrings
 // Note: If msconfig is a 64 bit process, this program also needs to be compiled as x64
+
+// Code based on https://stackoverflow.com/a/12683120
 
 #include "stdafx.h"
 #include "filereader.h"
@@ -67,10 +71,10 @@ BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam)
 						ReadProcessMemory(hProcess, pText, &szText[0], sizeof(TCHAR) * iCharsRead, NULL);
 
 						// Does the Find/Replace map contain the string found in the listview item?
-						map<wstring, wstring>* pFindReplaceData = (map<wstring, wstring>*)(lParam);
+						map<string, string>* pFindReplaceData = (map<string, string>*)(lParam);
 						if (pFindReplaceData == nullptr) break;
 
-						map<wstring, wstring>::iterator itMap = pFindReplaceData->find(szText);
+						map<string, string>::iterator itMap = pFindReplaceData->find(szText);
 						if (itMap != pFindReplaceData->end()) {
 							// We can reuse the lvItem struct for LVM_SETITEMTEXT, just change its text first
 							WriteProcessMemory(hProcess, pText, itMap->second.c_str(), LSTR, NULL);
@@ -92,7 +96,7 @@ BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam)
 	return TRUE;
 }
 
-// ** IsAppRunningAsAdmin - returns true if this instance of the app has admin privileges
+// ** IsAppRunningAsAdmin - Returns true if this instance of the app has admin privileges
 BOOL IsAppRunningAsAdmin()
 {
 	// https://www.codeproject.com/Articles/320748/Haephrati-Elevating-during-runtime
@@ -123,11 +127,11 @@ BOOL IsAppRunningAsAdmin()
 void RunAsAdmin()
 {
 	// https://www.codeproject.com/Articles/320748/Haephrati-Elevating-during-runtime
-	wchar_t szAppName[LSTR];
+	TCHAR szAppName[LSTR];
 	if (GetModuleFileName(NULL, szAppName, LSTR) != 0) {
 		// Launch self as admin
 		SHELLEXECUTEINFO shellExeInfo = { sizeof(shellExeInfo) };
-		shellExeInfo.lpVerb = L"runas";
+		shellExeInfo.lpVerb = TEXT("runas");
 		shellExeInfo.lpFile = szAppName;
 		shellExeInfo.hwnd = NULL;
 		shellExeInfo.nShow = SW_NORMAL;
@@ -138,15 +142,41 @@ void RunAsAdmin()
 
 int main()
 {
-
 	// Make sure we're running as admin...(otherwise we can't mess with the system config window)
 	if (!IsAppRunningAsAdmin()) {
 		RunAsAdmin();
 		return 0; // Close this instance and let the admin instance execute
 	}
 
-	FileReader fileReader("replace.txt");
-	map<wstring, wstring> vFindReplaceData; // Key is the string to find, Value is the string to replace it with
+	// Get rid of the console window
+	FreeConsole();
+
+	// Open the "Find & Replace" text file
+	TCHAR szFilePath[LSTR];
+	BOOL bFileOpened = FALSE;
+	while (!bFileOpened) {
+		szFilePath[0] = 0;
+		OPENFILENAME ofn;
+		ZeroMemory(&ofn, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = NULL;
+		ofn.lpstrFile = szFilePath;
+		ofn.nMaxFile = sizeof(szFilePath);
+		ofn.lpstrFilter = TEXT("Text\0 * .TXT\0");
+		ofn.nFilterIndex = 1;
+		ofn.lpstrTitle = TEXT("Open Find & Replace File");
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		bFileOpened = GetOpenFileName(&ofn);
+		
+		// If the user failed to open a text file, show a dialog to let them retry or close the program.
+		if (!bFileOpened) {
+			if (MessageBox(NULL, TEXT("Select a text file that contains find & replace text. E.g.: \n \"Stopped\" \"Running\""), TEXT("Please select a text file"), MB_RETRYCANCEL | MB_ICONWARNING) != IDRETRY) return 0;
+		}
+	}
+
+
+	FileReader fileReader(szFilePath);
+	map<string, string> vFindReplaceData; // Key is the string to find, Value is the string to replace it with
 
 	// Continue to check if a "System Configuration" window is open
 	while (true) {
