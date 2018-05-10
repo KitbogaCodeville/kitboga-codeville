@@ -36,18 +36,18 @@ class Client:
 
             for item in response:
                 # Check if the server echos back the client id
-                if item['clientID'] == self.client_id:
-                    action = item['action']
+                if item.get('clientID') == self.client_id:
+                    action = item.get('action')
 
-                    if item['data']:
-                        data = item['data']
+                    if action and item.get('data'):
+                        data = json.loads(item['data'])
 
                         if action == 'messagebox':
                             WinApi.show_message(
-                                data['title'] or '',
-                                data['message'] or '',
-                                WinApi.box_type(data['type'] or ''),
-                                data['icon'] and WinApi.IconType[data['icon']] or None
+                                data.get('title') or '',
+                                data.get('message') or '',
+                                WinApi.box_type(data.get('type') or ''),
+                                data.get('icon') and WinApi.IconType[data['icon'].upper()] or None
                             )
 
                         elif action == 'showimage':
@@ -55,8 +55,8 @@ class Client:
                             opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; x64; rv:60.0) Gecko/20100101 Firefox/60.0')]
                             request.install_opener(opener)
 
-                            request.urlretrieve(data['url'], 'image.tmp')
+                            request.urlretrieve(data.get('url') or '', 'image.tmp')
 
-                            subprocess.call(f'rundll32 C:\Program Files\Windows Photo Viewer\PhotoViewer.dll, ImageView_FullScreen {self.current_path}\\image.tmp')
+                            subprocess.call(f'rundll32 "C:\Program Files\Windows Photo Viewer\PhotoViewer.dll", ImageView_Fullscreen {self.current_path}\\image.tmp')
 
             time.sleep(20)
