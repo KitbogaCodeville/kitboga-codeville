@@ -1,0 +1,58 @@
+/* CSS STUFF OK */
+
+body{
+	background-color: #eaeaea;
+	font-family: "Trebuchet Ms";
+}
+header {
+	background-color: #fff;
+	padding: 4px 8px;
+	border-bottom: 1px solid #ccc;
+}
+
+#loading{
+	display: none;
+	position: absolute;
+	z-index: 999;
+	top: 50%;
+	left: 50%;
+	width: 420px;
+	margin-left: -210px;
+	height: 69px;
+	border: 1px solid #999;
+	padding: 1em 2em;
+	background-color: #fff;
+	box-shadow: 1px 0px 2px #1b1b1b;
+	text-align: center;
+}
+
+
+.dog {
+	background-image: url('/img/dog.jpg');
+	background-size: cover;
+	background-position : center center;
+}
+.spacer{
+	height: 1.5em;
+	width: 100%;
+}
+
+.jumbotron {
+	border: 1px solid *777;
+	box-shadow: 1px 8px 16px #ccc;
+	padding: 1.5em 2em;
+	margin-top: 4em;
+	background-color: #ffffffcc;
+}
+
+#footer {
+	 position: absolute;
+	 bottom: 0;
+	 font-size: .8em;
+	 width: 100%;
+}
+
+#accounts {
+	border-right: 1px solid #ccc;
+}
+
