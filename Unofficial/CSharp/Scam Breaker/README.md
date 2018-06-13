@@ -22,5 +22,5 @@ For now you'll need to edit the **Breaker_config.json**, which will be generated
 I'm going to make a GUI editor for the easy edit.
 This program is made by me, and me only.
 I really hope [Kitboga](https://www.twitch.tv/kitboga) uses this for his scambaits.
-I'd appreciate some feedback.. [Tweet me](https://www.twitter.com/0x000T) at
+I'd appreciate some feedback.. [Tweet me](https://www.twitter.com/0x000T)
 I hope you enjoy some fun times with this lil' program.
