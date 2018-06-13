@@ -16,8 +16,6 @@ And change the text inside, title of the notepad window. It takes minimal CPU.
 ### Screenshot
 ![alt text](http://0x0.st/s2hg.png "Screenshot")
 
-## [Download](https://github.com/MixedFeelingsSoftwares/Scam-Breaker/releases)
-
 For now you'll need to edit the **Breaker_config.json**, which will be generated inside **C:\Windows\Breaker_config.json**
 I'm going to make a GUI editor for the easy edit.
 This program is made by me, and me only.
