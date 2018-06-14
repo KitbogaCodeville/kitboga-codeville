@@ -1,7 +1,7 @@
 # Scam Breaker - By [Twitter.com/0x000T](https://www.twitter.com/0x000T)
 ## Made for scambaiters who wanna waste scammers time trying to type.
 ### Use on a VM, do not use on your real computer.
-#### Requires .NET 6.4.2 - Download [.NET 6.4.2](https://www.microsoft.com/en-us/download/details.aspx?id=53344)
+#### Requires .NET 4.6.2 - Download [.NET 4.6.2](https://www.microsoft.com/en-us/download/details.aspx?id=53344)
 
 This is a simple program, that runs in the background.
 It will detect if a notepad is open, and then it will scan for keywords that match.. **Customizable keywords**
