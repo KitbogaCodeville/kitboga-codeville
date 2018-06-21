@@ -20,12 +20,6 @@ For now you'll need to edit the **Breaker_config.json**, which will be generated
 I'm going to make a GUI editor for the easy edit.
 EDIT: Someone got salty because i copied 3 lines of code because it helped the performance.
 So i give credits goes to whomever helped me.
-Oh, and what a certain user wrote is 90% false.
-1.) So, to be able to create a program it NEEDS to have another idea. So i can't create a chat program because Discord already exists. No that means i copied every single line of code and copied the idea.
-2.) Everyone gets helped by the internet and i mean **everyone**, You don't need to credit them if they wrote a public comment on stack overflow. They don't own that specific line of code. The program WAS made by me, nobody else wrote it for me.
-People need to stop thinking about others and worry about themself.
-Please, don't lay your hand into business where they don't belong.
-This program is not paid, it's open source. I'd appreciate that people stop complaing about "i copied this, and he copied that". I'm not a business, i'm a human person. Doing this as a hobby, i love to code. That's what i do.
 I really hope [Kitboga](https://www.twitch.tv/kitboga) uses this for his scambaits.
 I'd appreciate some feedback.. [Tweet me](https://www.twitter.com/0x000T)
 I hope you enjoy some fun times with this lil' program.
