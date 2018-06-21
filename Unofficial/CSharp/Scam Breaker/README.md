@@ -18,7 +18,8 @@ And change the text inside, title of the notepad window. It takes minimal CPU.
 
 For now you'll need to edit the **Breaker_config.json**, which will be generated inside **C:\Windows\Breaker_config.json**
 I'm going to make a GUI editor for the easy edit.
-This program is made by me, and me only.
+EDIT: Someone got salty because i copied 3 lines of code because it helped the performance.
+So i give credits goes to whomever helped me.
 I really hope [Kitboga](https://www.twitch.tv/kitboga) uses this for his scambaits.
 I'd appreciate some feedback.. [Tweet me](https://www.twitter.com/0x000T)
 I hope you enjoy some fun times with this lil' program.
