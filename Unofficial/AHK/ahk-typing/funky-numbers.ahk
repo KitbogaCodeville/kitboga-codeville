@@ -1,4 +1,5 @@
 ; Originally authored by Nameless#7323/sgtqwerty and shared on the official Kitboga Discord
+; Mode select and fat fingers added by DangerBK
 ; This script grants the ability to type numbers either one-off, random other numbers, or numbers close by at a random chance
 
 #SingleInstance force
