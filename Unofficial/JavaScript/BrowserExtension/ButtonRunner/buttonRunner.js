@@ -17,12 +17,11 @@ var BREnabled=true;
 function moveElem(elem, newTop, newLeft, nopx=false){
 
 	
-	if(elem.classList.contains("runningButton")){
-		var newDiv=parent;
-	}else{
+	if(!elem.classList.contains("runningButton")){
 		elem.classList.add("runningButton");
 		elem.setAttribute("clickTries", 0);
 	}
+	
 	if(nopx){
 		return;
 	}
@@ -32,7 +31,7 @@ function moveElem(elem, newTop, newLeft, nopx=false){
 	elem.style.position="relative";
 
 	var tries =parseInt(elem.getAttribute("clickTries"), 10);
-	if(tries< (fMaxEscapes) ){
+	if(tries< fMaxEscapes ){
 	
 		elem.style.top = newTop +"px";
 		elem.style.left=newLeft +"px";
@@ -48,9 +47,9 @@ function moveElem(elem, newTop, newLeft, nopx=false){
 
 
 function getRndInteger(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
 function runAway(elem){
@@ -66,15 +65,13 @@ function runAway(elem){
 	
 	elem.classList.add("runningButton");
 
-	//var newTop=getRndInteger(-maxDelta, maxDelta);
-	var newTop=getRndInteger(0, maxDelta*2);
-	newTop=newTop-maxDelta;
+	var newTop=getRndInteger(-maxDelta, maxDelta);
+	
 	//console.log("got new top offset: "+newTop);
 	
 	
-	//var newLeft=getRndInteger(-maxDelta, maxDelta);
-	var newLeft=getRndInteger(0, maxDelta*2);
-	newLeft=newLeft-maxDelta;
+	var newLeft=getRndInteger(-maxDelta, maxDelta);
+	
 	//console.log("got new left offset: "+newLeft);
 	
 	
