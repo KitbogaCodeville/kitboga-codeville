@@ -1,0 +1,23 @@
+{
+
+  "manifest_version": 2,
+  "name": "Button Runner",
+  "version": "1.0",
+  "author":"marclass",
+
+  "description": "Makes html buttons and links run away from the cursor.",
+
+  "icons": {
+    
+  },
+
+  "content_scripts": [
+    {
+      //"matches": ["*://*.mozilla.org/*"],
+	  "matches": ["*://*/*"],
+      "js": ["buttonRunner.js"]
+	  
+    }
+  ]
+
+}
